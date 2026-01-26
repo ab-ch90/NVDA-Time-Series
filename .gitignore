@@ -416,3 +416,11 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+.venv/
+__pycache__/
+*.pyc
+data/raw/
+data/processed/
+reports/rigures/
+.DS_Store
