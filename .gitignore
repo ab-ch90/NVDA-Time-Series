@@ -422,5 +422,5 @@ __pycache__/
 *.pyc
 data/raw/
 data/processed/
-reports/rigures/
+reports/figures/
 .DS_Store
