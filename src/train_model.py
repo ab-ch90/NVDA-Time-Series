@@ -12,9 +12,11 @@ MODEL_DIR = Path("data/processed")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 def main(lags=10): # past 10 days
-    df = pd.read_csv(RAW_PATH) # reads csv, loads into DataFrame
-    df["Date"] = pd.to_datetime(df["Date"]) # convert Data column into real dates
-    df = df.set_index("Date").sort_index() # set Date as index and sort by time
+    df = pd.read_csv(RAW_PATH, index_col=0) 
+    df.index = pd.to_datetime(df.index, errors="coerce") # Parse the index as dates; bad rows become NaT
+    df = df[~df.index.isna()] # drop rows where the date couldn't be parsed (often junk/header rows)
+    df["Close"] = pd.to_numeric(df["Close"], errors="coerce") # force Close to be numeric; non-numeric becomes NaN
+    df = df.dropna(subset=["Close"]).sort_index() # drop rows where Close is missing after conversion
 
     series = df["Close"].dropna() # select closing price (most commonly used)
     data = make_lagged_features(series, lags=lags) # create lagged features
@@ -23,7 +25,7 @@ def main(lags=10): # past 10 days
     split = int(len(data) * 0.8)
     train, test = data.iloc[:split], data.iloc[split:]
 
-    # seperate features and target to prevent data leakage/ensure the model learned from past data; X = inputs (past prices), y = output (today's price)
+    # seperate features (x = past prices) and target (y = today's price)to prevent data leakage
     X_train, y_train = train.drop(columns=["y"]), train["y"]
     X_test, y_test = test.drop(columns=["y"]), test["y"]
 
@@ -38,8 +40,10 @@ def main(lags=10): # past 10 days
     (MODEL_DIR / "metrics.txt").write_text(f"MAE: {mae}\n") # save evaluation results
 
     print("Saved model to data/processed/model.joblib")
-    print("Saved metrics to data/processed/metric.txt")
+    print("Saved metrics to data/processed/metrics.txt")
     print("MAE:", mae)
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
+
+# trains time-series regression model that predicts stock prices using past price data
