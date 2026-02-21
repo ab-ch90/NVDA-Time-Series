@@ -1,10 +1,10 @@
 # NVDA-Time-Series
 
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+A Python time-series project that downloads historical NVIDIA (NVDA) stock price data, trains a simple regression model using lagged features, and generates short-term price forecasts.
 
-python src/download_data.py
-python src/train_model.py
-python src/predict.py
-python src/plot.py
+## Features
+- Downloads NVDA daily historical prices (Yahoo Finance via `yfinance`)
+- Creates lag-based features (past N days) for time-series modeling
+- Trains a Linear Regression model and evaluates it with MAE
+- Predicts the next few days using a rolling forecast
+- Saves a moving-average chart to `reports/figures/`
